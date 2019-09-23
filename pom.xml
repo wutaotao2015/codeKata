@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cn.taoblog</groupId>
-    <artifactId>emptyPro</artifactId>
+    <artifactId>codeKata</artifactId>
     <version>1.0-SNAPSHOT</version>
     <build>
         <plugins>
