@@ -1,16 +1,15 @@
-package cn.taoblog.codeKata.AllBalancedParentheses;
+package cn.taoblog.String;
 
-import org.junit.Test;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.runners.JUnit4;
+public class BalancedParensTest {
 
-import java.util.*;
-
-// Feel free to make your own tests 
-public class SolutionTest {
-    @Test
+    // @Test
     public void testExample() {
         List<String> warriorsList = new ArrayList<String>();
         //test for n = 0
@@ -43,4 +42,5 @@ public class SolutionTest {
         );
 
     }
+
 }

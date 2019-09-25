@@ -1,8 +1,6 @@
-package cn.taoblog.codeKata.AllBalancedParentheses;
+package cn.taoblog.String;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -24,7 +22,6 @@ public class BalancedParens {
     public static List<String> balancedParens(int n) {
         // your code here
         ArrayList<String> resultList = new ArrayList<>();
-
         return null;
     }
 }
