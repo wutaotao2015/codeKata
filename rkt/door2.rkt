@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname door) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname door2) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 
 (require 2htdp/image)
 (require 2htdp/universe)
@@ -9,8 +9,7 @@
 ; constants
 (define LOCK "lock")
 (define CLOSE "close")
-(define CN (* 28 3))
-(define OPEN CN)
+(define OPEN "open")
 (define BG (empty-scene 400 400))
 
 ; ws is a string
@@ -26,26 +25,17 @@
 
 ; ws->ws
 ; auto close door, using ticks to change ws from open to close
-(define (autoclose ws) 
-    (cond 
-      [(and (number? ws) (<= ws 0)) CLOSE]
-      [(and (number? ws) (> ws 0)) (- ws 1)]
-      [else ws]))
+(define (autoclose ws) (if (eq? ws OPEN) CLOSE ws))
 
-; helper function for show
-(define (words ws) (place-image (text ws 100 "black") 200 100 BG))
 ; ws->image
 ; show the ws with image
-(define (show ws) 
-  (cond 
-    [(number? ws) (words (number->string ws))]
-    [else (words ws)]))
+(define (show ws) (place-image (text ws 100 "black") 200 100 BG))
 
 ; main
 (define (main ws)
   (big-bang LOCK 
             [to-draw show]
-            [on-tick autoclose]
+            [on-tick autoclose 3]
             [on-key kh]
             ))
 (main 0)
@@ -69,5 +59,3 @@
 (check-expect (kh OPEN " ") OPEN)
 (check-expect (kh OPEN "s") OPEN)
 
-(check-expect (show LOCK) (words LOCK))
-(check-expect (show OPEN) (words (number->string OPEN)))
