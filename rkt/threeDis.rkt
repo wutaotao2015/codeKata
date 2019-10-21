@@ -70,9 +70,6 @@
 ;(check-expect (compare-w3 w3a w3b) (make-w3 #f #f #f))
 
 
-
-
-
 (define-struct editor [pre post])
 ; An Editor is a structure: (make-editor string string)
 ; it means the text is (string-append pre post), and a cursor is between pre and post
@@ -99,5 +96,34 @@
     (beside (text (editor-pre e2) 40 "black")
             (rectangle 1 40 "solid" "red")
             (text (editor-post e2) 40 "black")) BG))
+
+
+(define (remove-last str) (substring str 0 (- (string-length str) 1))) 
+(check-expect (remove-last "wtd") "wt")
+(check-expect (remove-last "wsg") "ws")
+
+(define (string-first str) (string-ith str 0))
+(check-expect (string-first "sdg") "s")
+(check-expect (string-first "wdg") "w")
+
+(define (string-last str) (string-ith str (- (string-length str) 1)))
+(check-expect (string-last "wsg") "g")
+(check-expect (string-last "wsd") "d")
+
+; editor string -> editor
+; when pressed key, change editor according to it 
+;  when key is "\b", delete the letter before cursor(if any), 
+; other key add the key string to the pre
+; \t and \r is ignored 
+;  when key is "left" or "right", move cursor left or right(if any), other longer than 1 length
+; string keys is ignored 
+(define (edit ed key) 
+   (cond
+     [(string=? key "\b") ed]
+     [(or (string=? key "\r") (string=? key "\t")) ed]
+     [(= (string-length key) 1) ed]
+     [(string=? key "left") ed]
+     [(string=? key "right") ed]
+     [else ed]))
 
 
