@@ -98,9 +98,13 @@
             (text (editor-post e2) 40 "black")) BG))
 
 
-(define (remove-last str) (substring str 0 (- (string-length str) 1))) 
-(check-expect (remove-last "wtd") "wt")
-(check-expect (remove-last "wsg") "ws")
+(define (string-remove-last str) (substring str 0 (- (string-length str) 1))) 
+(check-expect (string-remove-last "wtd") "wt")
+(check-expect (string-remove-last "wsg") "ws")
+
+(define (string-remove-first str) (substring str 1 (string-length str) )) 
+(check-expect (string-remove-first "wtd") "td")
+(check-expect (string-remove-first "wsg") "sg")
 
 (define (string-first str) (string-ith str 0))
 (check-expect (string-first "sdg") "s")
@@ -119,10 +123,14 @@
 ; string keys is ignored 
 (define (edit ed key) 
    (cond
-     [(string=? key "\b") ed]
+     [(string=? key "\b") (make-editor (string-remove-last (editor-pre ed)) (editor-post ed))]
      [(or (string=? key "\r") (string=? key "\t")) ed]
-     [(= (string-length key) 1) ed]
-     [(string=? key "left") ed]
+     [(= (string-length key) 1) (make-editor (string-append (editor-pre ed) key) (editor-post ed))]
+     [(string=? key "left")
+       (if (= (string-length (editor-pre ed)) 0) ed 
+          (make-editor (string-remove-last (editor-post ed)) (string-append (string-last (editor-pre ed)) (editor-post ed)))
+         )
+      ]
      [(string=? key "right") ed]
      [else ed]))
 
