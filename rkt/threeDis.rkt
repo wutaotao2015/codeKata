@@ -75,27 +75,36 @@
 ; it means the text is (string-append pre post), and a cursor is between pre and post
 (define e1 (make-editor "hello" "world"))
 (define e2 (make-editor "hel" "loworld"))
+(define e3 (make-editor "hello" ""))
+(define e4 (make-editor "" "hello"))
+(define e5 (make-editor "123456789abcd" ""))
 
-
-(define BG (empty-scene 400 400))
+(define BGH 400)
+(define BGW 200)
+(define FS 30)
+; 400BGW 40FS 22w 20CN 
+; 600BGW 60FS 33w 20CN
+; 200BGW 30FS 17w 12CN
+(define CN (- (/ BGW (/ FS 2)) 1))
+(define BG (empty-scene BGW BGH))
 
 ; editor -> image
 ; render an editor to a image
 (define (render ed) 
   (overlay/align "left" "center"
-    (beside (text (editor-pre ed) 40 "black")
-            (rectangle 1 40 "solid" "red")
-            (text (editor-post ed) 40 "black")) BG))
+    (beside (text (editor-pre ed) FS "black")
+            (rectangle 1 FS "solid" "red")
+            (text (editor-post ed) FS "black")) BG))
 
 (check-expect (render e1) (overlay/align "left" "center"
-    (beside (text (editor-pre e1) 40 "black")
-            (rectangle 1 40 "solid" "red")
-            (text (editor-post e1) 40 "black")) BG))
+    (beside (text (editor-pre e1) FS "black")
+            (rectangle 1 FS "solid" "red")
+            (text (editor-post e1) FS "black")) BG))
 
 (check-expect (render e2) (overlay/align "left" "center"
-    (beside (text (editor-pre e2) 40 "black")
-            (rectangle 1 40 "solid" "red")
-            (text (editor-post e2) 40 "black")) BG))
+    (beside (text (editor-pre e2) FS "black")
+            (rectangle 1 FS "solid" "red")
+            (text (editor-post e2) FS "black")) BG))
 
 
 (define (string-remove-last str) (substring str 0 (- (string-length str) 1))) 
@@ -123,15 +132,69 @@
 ; string keys is ignored 
 (define (edit ed key) 
    (cond
-     [(string=? key "\b") (make-editor (string-remove-last (editor-pre ed)) (editor-post ed))]
+     [(string=? key "\b") 
+       (if (= (string-length (editor-pre ed)) 0) ed 
+      (make-editor (string-remove-last (editor-pre ed)) (editor-post ed)))]
+
      [(or (string=? key "\r") (string=? key "\t")) ed]
-     [(= (string-length key) 1) (make-editor (string-append (editor-pre ed) key) (editor-post ed))]
+
+     [(= (string-length key) 1) 
+
+      ;; here the whole length can out of the BG, should use the length of pre plus post
+      (if (>= (string-length (editor-pre ed)) CN) ed 
+      (make-editor (string-append (editor-pre ed) key) (editor-post ed)))]
+
      [(string=? key "left")
        (if (= (string-length (editor-pre ed)) 0) ed 
-          (make-editor (string-remove-last (editor-post ed)) (string-append (string-last (editor-pre ed)) (editor-post ed)))
-         )
-      ]
-     [(string=? key "right") ed]
+          (make-editor (string-remove-last (editor-pre ed)) 
+                       (string-append (string-last (editor-pre ed)) (editor-post ed))))]
+
+     [(string=? key "right") 
+       (if (= (string-length (editor-post ed)) 0) ed 
+          (make-editor (string-append (editor-pre ed) (string-first (editor-post ed)) ) 
+                       (string-remove-first (editor-post ed))))]
      [else ed]))
+
+(check-expect (edit e1 "\b") (make-editor "hell" "world"))
+(check-expect (edit e2 "\b") (make-editor "he" "loworld"))
+(check-expect (edit e3 "\b") (make-editor "hell" ""))
+(check-expect (edit e4 "\b") (make-editor "" "hello"))
+
+(check-expect (edit e1 "\r") (make-editor "hello" "world"))
+(check-expect (edit e2 "\r") (make-editor "hel" "loworld"))
+(check-expect (edit e3 "\r") (make-editor "hello" ""))
+(check-expect (edit e4 "\r") (make-editor "" "hello"))
+
+(check-expect (edit e1 "\t") (make-editor "hello" "world"))
+(check-expect (edit e2 "\t") (make-editor "hel" "loworld"))
+(check-expect (edit e3 "\t") (make-editor "hello" ""))
+(check-expect (edit e4 "\t") (make-editor "" "hello"))
+
+(check-expect (edit e1 "s") (make-editor "hellos" "world"))
+(check-expect (edit e2 "s") (make-editor "hels" "loworld"))
+(check-expect (edit e3 "s") (make-editor "hellos" ""))
+(check-expect (edit e4 "s") (make-editor "s" "hello"))
+(check-expect (edit e5 "s") e5)
+
+(check-expect (edit e1 "left") (make-editor "hell" "oworld"))
+(check-expect (edit e2 "left") (make-editor "he" "lloworld"))
+(check-expect (edit e3 "left") (make-editor "hell" "o"))
+(check-expect (edit e4 "left") (make-editor "" "hello"))
+
+(check-expect (edit e1 "right") (make-editor "hellow" "orld"))
+(check-expect (edit e2 "right") (make-editor "hell" "oworld"))
+(check-expect (edit e3 "right") (make-editor "hello" ""))
+(check-expect (edit e4 "right") (make-editor "h" "ello"))
+
+; editor->editor
+; run the editor
+(define (run pre)
+   (big-bang (make-editor pre "")
+            [to-draw render] 
+            [on-key edit]
+             )   
+  )
+
+(run "type here")
 
 

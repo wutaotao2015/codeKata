@@ -10,7 +10,7 @@
 (define R 20)
 (define CAR (circle R "solid" "red"))
 (define BGW (* R 20))
-(define BGH (* R 4))
+(define BGH (* R 20))
 (define TREE
   (underlay/xy (circle 10 "solid" "green")
                9 15
@@ -99,7 +99,8 @@
                           [on-tick tock]
                           [to-draw render]
                           [on-mouse clicked]
-                          [stop-when end?])   
+                        ;  [stop-when end?]
+                        )   
                    )
 
 (main 1)
