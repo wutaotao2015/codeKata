@@ -23,8 +23,8 @@
 (define EMP (empty-scene BGW BGH))
 (define BG (place-image TREE (- BGW R) (- BGH R) EMP))
 (define CAREND (- BGW (* 3.5 R)))
-(define V 0.3)
-(define H 0.3)
+(define V 5)
+(define H 0.1)
 
 ; cat h constants
 (define MS 5)
@@ -65,11 +65,14 @@
 
 ; vcat -> vcat
 ; cat position x -> x + V, happiness h -> h - H
-(define (tock vc) (make-vcat (+ V (vcat-x vc)) (- (vcat-h vc) H)))
+(define (tock vc) 
+  (cond 
+    [(>= (+ V (vcat-x vc)) CAREND) (make-vcat 0 (- (vcat-h vc) H) )]
+    [else (make-vcat (+ V (vcat-x vc)) (- (vcat-h vc) H))]))
 
 (check-expect (tock vc1) (make-vcat (+ V (vcat-x vc1)) (- (vcat-h vc1) H)))
 (check-expect (tock vc2) (make-vcat (+ V (vcat-x vc2)) (- (vcat-h vc2) H)))
-
+(check-expect (tock vc5) (make-vcat 0 (- (vcat-h vc5) H)))
 
 ; when mouse clicked, put the car the x coordinate of clicked position
 ; ws -> ws 
@@ -82,13 +85,12 @@
 (check-expect (clicked vc2 (- BGW 10) HBH "button-down") vc2)
 
 ; vcat -> boolean
-; when the happiness gets to 0, or cat move to the end, it stops
-(define (end? vc) 
-  (if (or (>= (vcat-x vc) CAREND) 
-          (<= (vcat-h vc) 0)) #t #f))
+; when the happiness gets to 0, it stops
+(define (end? vc) (if (<= (vcat-h vc) 0) #t #f))
+
 (check-expect (end? vc1) #f)
 (check-expect (end? vc4) #t)
-(check-expect (end? vc5) #t)
+(check-expect (end? vc5) #f)
 
 ; number,number -> number
 ; over 100 set to 100, or set to num * fac
@@ -109,9 +111,7 @@
 
 ; ws -> image
 ; last image when world ended 
-(define (last-pic vc) 
-  (if (>= (vcat-x vc) CAREND) (text "your\ncar\narrived!" 30 "red") 
-      (text "your\nbattery\nis\nout!" 30 "red")))
+(define (last-pic vc) (text "your\nbattery\nis\nout!" 30 "red"))
 
 ; main
 (define (main vc) 
@@ -123,3 +123,6 @@
     [stop-when end? last-pic]))
 
 (main (make-vcat 0 100))
+
+
+
