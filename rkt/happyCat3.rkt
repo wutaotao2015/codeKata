@@ -2,7 +2,7 @@
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-beginner-reader.ss" "lang")((modname happyCat) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 
-;; a ball/cat moves non-stop, if hit the border, bounce like real world, the speed 
+;; a ball/cat moves non-stop, if hit the border, bounce like real world, the speed
 ;; never changes in movement
 
 (require 2htdp/image)
@@ -67,65 +67,65 @@
 
 ; vcat -> image
 ; render vcat to a image
-(define (render vc) (place-image  
-                    (place-image/align (rectangle RW (RHF (vcat-h vc)) "solid" "red")
-                       (+ MS (* 0.5 RW)) RH "center" "bottom" HB) 
-                    (/ BGW 2) (/ BGH 2)
-                    (place-image CAR (vc-x vc) (vc-y vc) BG)))
+(define (render vc) (place-image
+                     (place-image/align (rectangle RW (RHF (vcat-h vc)) "solid" "red")
+                                        (+ MS (* 0.5 RW)) RH "center" "bottom" HB)
+                     (/ BGW 2) (/ BGH 2)
+                     (place-image CAR (vc-x vc) (vc-y vc) BG)))
 
-(check-expect (render vc1) (place-image  
-                    (place-image/align (rectangle RW (RHF (vcat-h vc1)) "solid" "red")
-                       (+ MS (* 0.5 RW)) RH "center" "bottom" HB) 
-                    (/ BGW 2) (/ BGH 2)
-                    (place-image CAR (vc-x vc1) (vc-y vc1) BG)))
+(check-expect (render vc1) (place-image
+                            (place-image/align (rectangle RW (RHF (vcat-h vc1)) "solid" "red")
+                                               (+ MS (* 0.5 RW)) RH "center" "bottom" HB)
+                            (/ BGW 2) (/ BGH 2)
+                            (place-image CAR (vc-x vc1) (vc-y vc1) BG)))
 
-(check-expect (render vc2) (place-image  
-                    (place-image/align (rectangle RW (RHF (vcat-h vc2)) "solid" "red")
-                       (+ MS (* 0.5 RW)) RH "center" "bottom" HB) 
-                    (/ BGW 2) (/ BGH 2)
-                    (place-image CAR (vc-x vc2) (vc-y vc2) BG)))
+(check-expect (render vc2) (place-image
+                            (place-image/align (rectangle RW (RHF (vcat-h vc2)) "solid" "red")
+                                               (+ MS (* 0.5 RW)) RH "center" "bottom" HB)
+                            (/ BGW 2) (/ BGH 2)
+                            (place-image CAR (vc-x vc2) (vc-y vc2) BG)))
 
 ; vcat -> vcat
 ; get new position's vcat after one tick
-(define (nextvc vc) 
-  (make-vcat 
-    (make-posn 
-      (+ (vc-x vc) (vc-dx vc))
-      (+ (vc-y vc) (vc-dy vc)))
-    (vcat-v vc) (vcat-h vc)
-  ))
+(define (nextvc vc)
+  (make-vcat
+   (make-posn
+    (+ (vc-x vc) (vc-dx vc))
+    (+ (vc-y vc) (vc-dy vc)))
+   (vcat-v vc) (vcat-h vc)
+   ))
 ; vcat -> vcat
 ; make vcat's vel's dx turn to opposite number
-(define (turndx vc) (make-vcat 
-                     (vcat-p vc) 
+(define (turndx vc) (make-vcat
+                     (vcat-p vc)
                      (make-vel (- 0 (vc-dx vc)) (vc-dy vc))
                      (vcat-h vc)))
 
 ; vcat -> vcat
 ; make vcat's vel's dx turn to opposite number
-(define (turndy vc) (make-vcat 
-                     (vcat-p vc) 
+(define (turndy vc) (make-vcat
+                     (vcat-p vc)
                      (make-vel (vc-dx vc) (- 0 (vc-dy vc)))
                      (vcat-h vc)))
 
 ; vcat -> vcat
 ; cat position x -> x + V, happiness h -> h - H
-(define (tock vc) 
-  (cond 
-    [(>= (vc-x (nextvc vc)) WEND) (turndx vc)]
-    [(<= (vc-x (nextvc vc)) 0) (turndx vc)]
-    [(>= (vc-y (nextvc vc)) HEND) (turndy vc)]
-    [(<= (vc-y (nextvc vc)) 0) (turndy vc)]
-    [else (nextvc vc)]))
+(define (tock vc)
+  (cond
+   [(>= (vc-x (nextvc vc)) WEND) (turndx vc)]
+   [(<= (vc-x (nextvc vc)) 0) (turndx vc)]
+   [(>= (vc-y (nextvc vc)) HEND) (turndy vc)]
+   [(<= (vc-y (nextvc vc)) 0) (turndy vc)]
+   [else (nextvc vc)]))
 
 ;(check-expect (tock vc1) (make-vcat (+ V (vcat-x vc1)) (- (vcat-h vc1) H)))
 ;(check-expect (tock vc2) (make-vcat (+ V (vcat-x vc2)) (- (vcat-h vc2) H)))
 ;(check-expect (tock vc5) (make-vcat 0 (- (vcat-h vc5) H)))
 
 ;; when mouse clicked, put the car the x coordinate of clicked position
-;; ws -> ws 
+;; ws -> ws
 ;; mouse event handler: when clicked car position(ws) set to x, otherwise remain the same
-;(define (clicked vc x y me) 
+;(define (clicked vc x y me)
 ;  (cond [(string=? me "button-up") (make-vcat x (vcat-h vc))]
 ;        [else vc]))
 ;
@@ -142,13 +142,13 @@
 ;
 ;; number,number -> number
 ;; over 100 set to 100, or set to num * fac
-;(define (feed num fac) (if (>= (* num fac) 100) 100 (* num fac)))      
+;(define (feed num fac) (if (>= (* num fac) 100) 100 (* num fac)))
 ;
 ;; ws->ws
-;; key event handler, down arrow key increase ws by 1/5, up arrow key increase ws by 1/3 
+;; key event handler, down arrow key increase ws by 1/5, up arrow key increase ws by 1/3
 ;; maximum can not be bigger than 100
-;(define (kh vc key) 
-;  (cond 
+;(define (kh vc key)
+;  (cond
 ;    [(string=? key "down") (make-vcat (vcat-x vc)(feed (vcat-h vc) 6/5))]
 ;    [(string=? key "up")  (make-vcat (vcat-x vc)(feed (vcat-h vc) 4/3))]
 ;    [else vc]
@@ -158,12 +158,12 @@
 ;(check-expect (kh vc1 "left") vc1)
 ;
 ;; ws -> image
-;; last image when world ended 
+;; last image when world ended
 ;(define (last-pic vc) (text "your\nbattery\nis\nout!" 30 "red"))
 ;
 ;; main
-;(define (main vc) 
-;  (big-bang vc 
+;(define (main vc)
+;  (big-bang vc
 ;    [to-draw render]
 ;    [on-tick tock]
 ;    [on-key kh]
