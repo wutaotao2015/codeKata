@@ -19,10 +19,6 @@
 ; A Vel is a structure:
 ;  (make-vel number number)
 ;  meaning the velocity of the cat
-(define vela (make-vel 10 8))
-(define velb (make-vel -3 3))
-(define velc (make-vel 6 -4))
-(define veld (make-vel -5 -1))
 
 ;cat x constants
 (define R 20)
@@ -45,6 +41,15 @@
 ; the height of red bar, hap is happiness, 0 to 100
 (define (RHF hap) (* RH hap 0.01))
 (define HB (rectangle HBW HBH "solid" "black"))
+
+
+(define vela (make-vel 10 8))
+(define velb (make-vel -3 3))
+(define velc (make-vel 6 -4))
+(define veld (make-vel -5 -1))
+(define vele (make-vel ))
+(define velf (make-vel WEND -1))
+(define velg (make-vel WEND -1))
 
 (define vc1 (make-vcat (make-posn 20 30) vela 100))
 (define vc2 (make-vcat (make-posn 60 20) velb 0))
@@ -118,9 +123,9 @@
    [(<= (vc-y (nextvc vc)) 0) (turndy vc)]
    [else (nextvc vc)]))
 
-;(check-expect (tock vc1) (make-vcat (+ V (vcat-x vc1)) (- (vcat-h vc1) H)))
-;(check-expect (tock vc2) (make-vcat (+ V (vcat-x vc2)) (- (vcat-h vc2) H)))
-;(check-expect (tock vc5) (make-vcat 0 (- (vcat-h vc5) H)))
+(check-expect (tock vc1) (make-vcat (+ V (vcat-x vc1)) (- (vcat-h vc1) H)))
+(check-expect (tock vc2) (make-vcat (+ V (vcat-x vc2)) (- (vcat-h vc2) H)))
+(check-expect (tock vc5) (make-vcat 0 (- (vcat-h vc5) H)))
 
 ;; when mouse clicked, put the car the x coordinate of clicked position
 ;; ws -> ws
