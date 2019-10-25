@@ -47,9 +47,6 @@
 (define velb (make-vel -3 3))
 (define velc (make-vel 6 -4))
 (define veld (make-vel -5 -1))
-(define vele (make-vel ))
-(define velf (make-vel WEND -1))
-(define velg (make-vel WEND -1))
 
 (define vc1 (make-vcat (make-posn 20 30) vela 100))
 (define vc2 (make-vcat (make-posn 60 20) velb 0))
@@ -97,7 +94,7 @@
    (make-posn
     (+ (vc-x vc) (vc-dx vc))
     (+ (vc-y vc) (vc-dy vc)))
-   (vcat-v vc) (vcat-h vc)
+   (vcat-v vc) (- (vcat-h vc) H)
    ))
 ; vcat -> vcat
 ; make vcat's vel's dx turn to opposite number
@@ -123,59 +120,58 @@
    [(<= (vc-y (nextvc vc)) 0) (turndy vc)]
    [else (nextvc vc)]))
 
-(check-expect (tock vc1) (make-vcat (+ V (vcat-x vc1)) (- (vcat-h vc1) H)))
-(check-expect (tock vc2) (make-vcat (+ V (vcat-x vc2)) (- (vcat-h vc2) H)))
-(check-expect (tock vc5) (make-vcat 0 (- (vcat-h vc5) H)))
+;(check-expect (tock vc1) (make-vcat (+ V (vcat-x vc1)) (- (vcat-h vc1) H)))
+;(check-expect (tock vc2) (make-vcat (+ V (vcat-x vc2)) (- (vcat-h vc2) H)))
+;(check-expect (tock vc5) (make-vcat 0 (- (vcat-h vc5) H)))
 
-;; when mouse clicked, put the car the x coordinate of clicked position
-;; ws -> ws
-;; mouse event handler: when clicked car position(ws) set to x, otherwise remain the same
-;(define (clicked vc x y me)
-;  (cond [(string=? me "button-up") (make-vcat x (vcat-h vc))]
-;        [else vc]))
-;
+;; when mouse clicked, put the car the position of clicked position
+;; vcat -> vcat
+(define (clicked vc x y me)
+  (cond [(string=? me "button-up") (make-vcat (make-posn (vc-x vc) (vc-y vc)) (vcat-v vc) (vcat-h vc))]
+        [else vc]))
+
 ;(check-expect (clicked vc1 (- BGW 10) HBH "button-up") (make-vcat (- BGW 10) (vcat-h vc1)))
 ;(check-expect (clicked vc2 (- BGW 10) HBH "button-down") vc2)
-;
-;; vcat -> boolean
-;; when the happiness gets to 0, it stops
-;(define (end? vc) (if (<= (vcat-h vc) 0) #t #f))
-;
+
+; vcat -> boolean
+; when the happiness gets to 0, it stops
+(define (end? vc) (if (<= (vcat-h vc) 0) #t #f))
+
 ;(check-expect (end? vc1) #f)
 ;(check-expect (end? vc4) #t)
 ;(check-expect (end? vc5) #f)
-;
-;; number,number -> number
-;; over 100 set to 100, or set to num * fac
-;(define (feed num fac) (if (>= (* num fac) 100) 100 (* num fac)))
-;
-;; ws->ws
-;; key event handler, down arrow key increase ws by 1/5, up arrow key increase ws by 1/3
-;; maximum can not be bigger than 100
-;(define (kh vc key)
-;  (cond
-;    [(string=? key "down") (make-vcat (vcat-x vc)(feed (vcat-h vc) 6/5))]
-;    [(string=? key "up")  (make-vcat (vcat-x vc)(feed (vcat-h vc) 4/3))]
-;    [else vc]
-;    ))
+
+; number,number -> number
+; over 100 set to 100, or set to num * fac
+(define (feed num fac) (if (>= (* num fac) 100) 100 (* num fac)))
+
+; vcat->vcat
+; key event handler, down arrow key increase ws by 1/5, up arrow key increase ws by 1/3
+; maximum can not be bigger than 100
+(define (kh vc key)
+  (cond
+    [(string=? key "down") (make-vcat (vcat-p vc)(vcat-v vc)(feed (vcat-h vc) 6/5))]
+    [(string=? key "up")  (make-vcat (vcat-p vc)(vcat-v vc)(feed (vcat-h vc) 4/3))]
+    [else vc]
+    ))
 ;(check-expect (kh vc3 "down") (make-vcat (vcat-x vc3) (feed (vcat-h vc3) 6/5)))
 ;(check-expect (kh vc2 "up") (make-vcat (vcat-x vc2) (feed (vcat-h vc2) 4/3)))
 ;(check-expect (kh vc1 "left") vc1)
-;
-;; ws -> image
-;; last image when world ended
-;(define (last-pic vc) (text "your\nbattery\nis\nout!" 30 "red"))
-;
-;; main
-;(define (main vc)
-;  (big-bang vc
-;    [to-draw render]
-;    [on-tick tock]
-;    [on-key kh]
-;    [on-mouse clicked]
-;    [stop-when end? last-pic]))
-;
-;(main (make-vcat 0 100))
+
+; ws -> image
+; last image when world ended
+(define (last-pic vc) (text "your\nbattery\nis\nout!" 30 "red"))
+
+; main
+(define (main vc)
+  (big-bang vc
+    [to-draw render]
+    [on-tick tock]
+    [on-key kh]
+    [on-mouse clicked]
+    [stop-when end? last-pic]))
+
+(main (make-vcat (make-posn 0 0) (make-vel 4 13) 100))
 
 
 
