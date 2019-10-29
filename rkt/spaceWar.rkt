@@ -25,8 +25,6 @@
 ;   (make-ufo (make-posn number number))
 ;  it is the location of ufo
 (define-struct ufo [p])
-(define (ufo-x u) (posn-x (ufo-p u)))
-(define (ufo-y u) (posn-y (ufo-p u)))
 
 (define ufo1 (make-ufo (make-posn (/ BGW 2) 0)))
 (define ufo2 (make-ufo (make-posn (/ BGW 2) 20)))
@@ -43,8 +41,6 @@
 ;  (make-missile (make-posn number number)
 ;  it is the missile location
 (define-struct mis [p])
-(define (mis-x m) (posn-x (mis-p m)))
-(define (mis-y m) (posn-y (mis-p m)))
 
 (define mis1 (make-mis (make-posn (/ BGW 2) (- BGH 30))))
 (define mis2 (make-mis (make-posn (/ BGW 2) (- BGH 40))))
@@ -53,22 +49,12 @@
 ;   (make-aim (make-ufo posn) (make-tank number number))
 ;   it is a state which tank is aiming at ufo, no missile
 (define-struct aim [ufo tank])
-(define (aim-ux a) (ufo-x (aim-ufo a)))
-(define (aim-uy a) (ufo-y (aim-ufo a)))
-(define (aim-tx a) (tank-x (aim-tank a)))
-(define (aim-tv a) (tank-v (aim-tank a)))
 
 (define aim1 (make-aim ufo1 tank1))
 (define aim2 (make-aim ufo2 tank2))
 ; an fire is a structure
 ;  (make-fire (make-ufo posn) (make-tank number number) (make-missile posn))
 (define-struct fire [ufo tank mis])
-(define (fire-ux f) (ufo-x (fire-ufo f)))
-(define (fire-uy f) (ufo-y (fire-ufo f)))
-(define (fire-tx f) (tank-x (fire-tank f)))
-(define (fire-tv f) (tank-v (fire-tank f)))
-(define (fire-mx f) (mis-x (fire-mis f)))
-(define (fire-my f) (mis-y (fire-mis f)))
 
 (define fire1 (make-fire ufo1 tank1 mis1) )
 (define fire2 (make-fire ufo2 tank2 mis2) )
@@ -78,30 +64,45 @@
 ;   (make-fire (make-ufo posn) (make-tank number number) (make-missile posn))
 ;  it is the complete state of the world program
 
+; ufo -> image
+;  render ufo to an image
+(define (ufo-render u im)
+  (place-image UFO (posn-x (ufo-p u)) (posn-y (ufo-p u)) im))
+
+; tank -> image
+;   render tank to an image
+(define (tank-render t im)
+  (place-image TANK (tank-x t) (- BGH (/ TH 2)) im))
+
+; mis -> image
+;  render mis to an image
+(define (mis-render m im)
+  (place-image MIS (posn-x (mis-p m)) (posn-y (mis-p m)) im))
+
 ; ws -> image
 (define (render ws)
   (cond
-   [(aim? ws) (place-image UFO (aim-ux ws) (aim-uy ws)
-                           (place-image TANK (aim-tx ws) (- BGH (/ TH 2)) BG))]
-   [(fire? ws) (place-image MIS (fire-mx ws) (fire-my ws)
-                            (place-image UFO (fire-ux ws) (fire-uy ws)
-                                         (place-image TANK (fire-tx ws) (- BGH (/ TH 2)) BG)))]))
-
+   [(aim? ws) (ufo-render (aim-ufo ws) (tank-render (aim-tank ws) BG))]
+   [(fire? ws)
+    (mis-render (fire-mis ws)
+                (ufo-render (fire-ufo ws)
+                            (tank-render (fire-tank ws) BG)))]))
+; render test
 (check-expect (render aim1)
-              (place-image UFO (aim-ux aim1) (aim-uy aim1)
-                           (place-image TANK (aim-tx aim1) (- BGH (/ TH 2)) BG)))
+              (place-image UFO (posn-x (ufo-p (aim-ufo aim1))) (posn-y (ufo-p  (aim-ufo aim1)))
+                           (place-image TANK (tank-x (aim-tank aim1))
+                                        (- BGH (/ TH 2)) BG)))
 
 (check-expect (render fire1)
-              (place-image MIS (fire-mx fire1) (fire-my fire1)
-                           (place-image UFO (fire-ux fire1) (fire-uy fire1)
-                                        (place-image TANK (fire-tx fire1) (- BGH (/ TH 2)) BG))))
-
-;(define a1 (place-image UFO (aim-ux aim1) (aim-uy aim1)
-;                        (place-image TANK (aim-tx aim1) (- BGH (/ TH 2)) BG)))
-;(define f1 (place-image MIS (fire-mx fire1) (fire-my fire1)
-;                        (place-image UFO (fire-ux fire1) (fire-uy fire1)
-;                                     (place-image TANK (fire-tx fire1) (- BGH (/ TH 2)) BG))))
-
+              (place-image MIS
+                           (posn-x (mis-p (fire-mis fire1)))
+                           (posn-y (mis-p  (fire-mis fire1)))
+                           (place-image UFO
+                                        (posn-x (ufo-p (fire-ufo fire1)))
+                                        (posn-y (ufo-p (fire-ufo fire1)))
+                                        (place-image TANK
+                                                     (tank-x (fire-tank fire1))
+                                                     (- BGH (/ TH 2)) BG))))
 
 
 
