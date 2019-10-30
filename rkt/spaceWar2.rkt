@@ -86,11 +86,11 @@
 ; ws -> image
 (define (render ws)
   (cond
-    [(aim? ws) (ufo-render (aim-ufo ws) (tank-render (aim-tank ws) BG))]
-    [(fire? ws)
-     (mis-render (fire-mis ws)
-                 (ufo-render (fire-ufo ws)
-                             (tank-render (fire-tank ws) BG)))]))
+   [(aim? ws) (ufo-render (aim-ufo ws) (tank-render (aim-tank ws) BG))]
+   [(fire? ws)
+    (mis-render (fire-mis ws)
+                (ufo-render (fire-ufo ws)
+                            (tank-render (fire-tank ws) BG)))]))
 ; render test
 (check-expect (render aim1)
               (place-image UFO (posn-x (aim-ufo aim1)) (posn-y (aim-ufo aim1))
@@ -117,17 +117,17 @@
 ;  stop when the ufo lands or missile hit the ufo(distance is less than UFOW)
 (define (gameOver ws)
   (cond
-    [(aim? ws) (cond
-                 [(>=  (posn-y (aim-ufo ws)) (- BGH (/ UFOH 2))) #t]
-                 [else #f]
-                 )]
-    [(fire? ws) (cond
-                  [(>=  (posn-y (fire-ufo ws)) (- BGH (/ UFOH 2))) #t]
-                  [(<=  (dis (fire-ufo ws) (fire-mis ws)) (/ UFOW 2)) #t]
-                  [(< (posn-y (fire-mis ws)) (posn-y (fire-ufo ws))) #t]
-                  [else #f]
-                  )]
-    ))
+   [(aim? ws) (cond
+               [(>=  (posn-y (aim-ufo ws)) (- BGH (/ UFOH 2))) #t]
+               [else #f]
+               )]
+   [(fire? ws) (cond
+                [(>=  (posn-y (fire-ufo ws)) (- BGH (/ UFOH 2))) #t]
+                [(<=  (dis (fire-ufo ws) (fire-mis ws)) (/ UFOW 2)) #t]
+                [(< (posn-y (fire-mis ws)) (posn-y (fire-ufo ws))) #t]
+                [else #f]
+                )]
+   ))
 (check-expect (gameOver aim1) #f)
 (check-expect (gameOver fire1) #f)
 (check-expect (gameOver aim2) #t)
@@ -137,15 +137,15 @@
 ;  render ws to image at last
 (define (final ws)
   (cond
-    [(aim? ws) (text "Game Over!" 30 "red")]
-    [else
-      (cond
-        [(<=  (dis (fire-ufo ws) (fire-mis ws)) (/ UFOW 2))
-         (text "Congratulations!\nUFO got hit!" 30 "red")]
-        [(< (posn-y (fire-mis ws)) (posn-y (fire-ufo ws)))
-         (text "You just missed it!" 30 "red")]
-        [else (text "Game Over!" 30 "red")])
-      ])
+   [(aim? ws) (text "Game Over!" 30 "red")]
+   [else
+    (cond
+     [(<=  (dis (fire-ufo ws) (fire-mis ws)) (/ UFOW 2))
+      (text "Congratulations!\nUFO got hit!" 30 "red")]
+     [(< (posn-y (fire-mis ws)) (posn-y (fire-ufo ws)))
+      (text "You just missed it!" 30 "red")]
+     [else (text "Game Over!" 30 "red")])
+    ])
   )
 
 ; ws -> ws
@@ -154,45 +154,50 @@
 ;   MIS is vertical up(2x speed of UFO) and not changed in horizontal level
 ;   TANK is moving accoring to its v
 (define (move ws) (cond
-                    [(aim? ws) (make-aim (make-posn (+ UFODX (posn-x (aim-ufo ws)))
-                                                    (+ UFOV (posn-y (aim-ufo ws)))
-                                                    ) 
-                                         (make-tank (+ (tank-v (aim-tank ws)) (tank-x (aim-tank ws)))
-                                                    (tank-v (aim-tank ws)))
-                                         )]
-                    [(fire? ws) (make-fire (make-posn (+ UFODX (posn-x (fire-ufo ws)))
-                                                      (+ UFOV (posn-y (fire-ufo ws)))
-                                                      ) 
-                                           (fire-tank ws)
-                                           (make-posn (posn-x (fire-mis ws))(- (posn-y (fire-mis ws)) (* 2 UFOV)))
-                                           )]
-                    ))
+                   [(aim? ws) (make-aim (make-posn (+ UFODX (posn-x (aim-ufo ws)))
+                                                             (+ UFOV (posn-y (aim-ufo ws)))
+                                                             ) 
+                                        (make-tank (+ (tank-v (aim-tank ws)) (tank-x (aim-tank ws)))
+                                                   (tank-v (aim-tank ws)))
+                                        )]
+                   [(fire? ws) (make-fire (make-posn (+ UFODX (posn-x (fire-ufo ws)))
+                                                               (+ UFOV (posn-y (fire-ufo ws)))
+                                                               ) 
+                                          (fire-tank ws)
+                                         (make-posn (posn-x (fire-mis ws))
+                                                               (- (posn-y (fire-mis ws)) (* 2 UFOV))) 
+                                          )]
+                   ))
 (check-expect (move aim1) (make-aim (make-posn (+ UFODX (posn-x (aim-ufo aim1)))
-                                               (+ UFOV (posn-y (aim-ufo aim1)))
-                                               ) 
+                                                         (+ UFOV (posn-y (aim-ufo aim1)))
+                                                         ) 
                                     (make-tank (+ (tank-v (aim-tank aim1)) (tank-x (aim-tank aim1)))
                                                (tank-v (aim-tank aim1)))
                                     ))
 (check-expect (move fire1) (make-fire (make-posn (+ UFODX (posn-x (fire-ufo fire1)))
-                                                 (+ UFOV (posn-y (fire-ufo fire1)))
-                                                 ) 
+                                                           (+ UFOV (posn-y (fire-ufo fire1)))
+                                                           ) 
                                       (fire-tank fire1)
-                                      (make-posn  (posn-x (fire-mis fire1))(-  (posn-y (fire-mis fire1)) (* 2 UFOV)))
+                                     (make-posn  (posn-x (fire-mis fire1))
+                                                           (-  (posn-y (fire-mis fire1)) (* 2 UFOV))) 
                                       ))
 
 ; ws -> ws
 ;  key event handler, left and right key turn the tank left and right
 ;  space key launch the mis if it has not bee launched yet
 (define (kh ws key) (if (aim? ws)
-                      (cond
-                        [(or (and (string=? key "left") (> (tank-v (aim-tank ws)) 0))
-                             (and (string=? key "right") (< (tank-v (aim-tank ws)) 0)))
-                         (make-aim (aim-ufo ws)
-                                   (make-tank (tank-x (aim-tank ws))
-                                              (- 0 (tank-v (aim-tank ws)))
-                                              ))]
-                        [(string=? key " ") (make-fire (aim-ufo ws)(aim-tank ws) (make-posn (tank-x (aim-tank ws)) TANKY ))]
-                        [else ws]) ws))
+                        (cond
+                         [(or (and (string=? key "left") (> (tank-v (aim-tank ws)) 0))
+                              (and (string=? key "right") (< (tank-v (aim-tank ws)) 0)))
+                          (make-aim (aim-ufo ws)
+                                    (make-tank (tank-x (aim-tank ws))
+                                               (- 0 (tank-v (aim-tank ws)))
+                                               ))]
+                         [(string=? key " ") (make-fire (aim-ufo ws)
+                                                        (aim-tank ws)
+                                                        (make-posn (tank-x (aim-tank ws))
+                                                                             TANKY ))]
+                         [else ws]) ws))
 (check-expect (kh fire1 "left") fire1)
 (check-expect (kh aim1 "left") (make-aim (aim-ufo aim1)
                                          (make-tank (tank-x (aim-tank aim1))
@@ -206,7 +211,8 @@
                                                      )))
 (check-expect (kh aim2 " ") (make-fire (aim-ufo aim2)
                                        (aim-tank aim2)
-                                       (make-posn (tank-x (aim-tank aim2))TANKY )))
+                                       (make-posn (tank-x (aim-tank aim2))
+                                                            TANKY )))
 
 (define init (make-aim ufo1 tank1))
 ; ws->image
@@ -217,5 +223,5 @@
                             [stop-when gameOver final]
                             [on-key kh]))
 
-;(main init)
+(main init)
 
