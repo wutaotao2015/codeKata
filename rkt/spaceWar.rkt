@@ -217,5 +217,5 @@
                             [stop-when gameOver final]
                             [on-key kh]))
 
-;(main init)
+(main init)
 
