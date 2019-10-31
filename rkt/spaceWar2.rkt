@@ -50,7 +50,7 @@
 (define mis3 (make-posn (+ 1 (/ BGW 2)) (- (/ BGH 2) 1)))
 
 ; an sgt is a structure
-;  (make-sgt posn (make-tank number number) posn/boolean)
+;  (make-sgt posn (make-tank number number) posn/#f)
 (define-struct sgt [ufo tank mis])
 
 (define sgt1 (make-sgt ufo1 tank1 #f))
@@ -75,7 +75,7 @@
 ;  render mis to an image
 (define (mis-render m im)
   (cond
-    [(boolean? m) im]
+    [(false? m) im]
     [else (place-image MIS (posn-x m) (posn-y m) im)]))
 
 ; ws -> image
@@ -109,7 +109,7 @@
 ;  stop when the ufo lands or missile hit the ufo(distance is less than UFOW)
 (define (gameOver ws)
   (cond
-    [(boolean? (sgt-mis ws)) (cond
+    [(false? (sgt-mis ws)) (cond
                                [(>=  (posn-y (sgt-ufo ws)) (- BGH (/ UFOH 2))) #t]
                                [else #f]
                                )]
@@ -129,7 +129,7 @@
 ;  render ws to image at last
 (define (final ws)
   (cond
-    [(boolean? (sgt-mis ws)) (text "Game Over!" 30 "red")]
+    [(false? (sgt-mis ws)) (text "Game Over!" 30 "red")]
     [else
       (cond
         [(<=  (dis (sgt-ufo ws) (sgt-mis ws)) (/ UFOW 2))
@@ -146,7 +146,7 @@
 ;   MIS is vertical up(2x speed of UFO) and not changed in horizontal level
 ;   TANK is moving accoring to its v
 (define (move ws) (cond
-                    [(boolean? (sgt-mis ws)) (make-sgt (make-posn (+ UFODX (posn-x (sgt-ufo ws)))
+                    [(false? (sgt-mis ws)) (make-sgt (make-posn (+ UFODX (posn-x (sgt-ufo ws)))
                                                                   (+ UFOV (posn-y (sgt-ufo ws)))
                                                                   ) 
                                                        (make-tank (+ (tank-v (sgt-tank ws)) (tank-x (sgt-tank ws)))
@@ -177,7 +177,7 @@
 ; ws -> ws
 ;  key event handler, left and right key turn the tank left and right
 ;  space key launch the mis if it has not bee launched yet
-(define (kh ws key) (if (boolean? (sgt-mis ws))
+(define (kh ws key) (if (false? (sgt-mis ws))
                       (cond
                         [(or (and (string=? key "left") (> (tank-v (sgt-tank ws)) 0))
                              (and (string=? key "right") (< (tank-v (sgt-tank ws)) 0)))
