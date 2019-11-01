@@ -67,7 +67,7 @@
 (define (kh ws key) (cond
                      [(and (string=? (wkl-type ws) "circle") 
                            (string=? (wkl-color ws) "red")
-                           (string=? key " ")) 
+                           (key=? key " ")) 
                       (make-wkl "circle" 10 "green")]
                      [else ws]
                       ))
