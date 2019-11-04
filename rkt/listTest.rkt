@@ -1,6 +1,5 @@
-;; The first three lines of this file were inserted by DrRacket. They record metadata
-;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname listTest) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#lang racket
+(require test-engine/racket-tests)
 
 ; a ls is one of
 ;   '()
@@ -11,11 +10,14 @@
 ;  ls string-> boolean
 ;    judge a name is on list
 (define (judge lst target) (cond
-                      [(empty? lst) #f]
-                      [(string=? (first lst) target) #t]
-                      [else (judge (rest lst) target)]
-                      ))
-(judge ls1 "sss")
-(judge ls1 "wsl")
-(judge ls2 "cll")
-(judge ls2 "sdl")
+                             [(empty? lst) #f]
+                             [(string=? (first lst) target) #t]
+                             [else (judge (rest lst) target)]
+                             ))
+(check-expect (judge ls1 "sss") #f)
+(check-expect (judge ls1 "wsl") #t)
+(check-expect (judge ls2 "cll") #t)
+(check-expect (judge ls2 "sdl") #f)
+(test)
+
+
