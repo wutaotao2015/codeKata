@@ -112,13 +112,13 @@
 
 ; List-of-string -> String
 ; concatenates all strings in l into one long string
- 
+
 (check-expect (cat '()) "")
 (check-expect (cat (cons "a" (cons "b" '()))) "ab")
 (check-expect
   (cat (cons "ab" (cons "cd" (cons "ef" '()))))
   "abcdef")
- 
+
 (define (cat l)
   (cond
     [(empty? l) ""]
@@ -137,19 +137,61 @@
 (define (illsize iml n) (cond
                           [(empty? iml) #f]
                           [else (if (and (= (image-width (first iml)) n) 
-                                    (= (image-height (first iml)) n))
-                               (illsize (rest iml) n)
-                               (first iml)
-                             )]
+                                         (= (image-height (first iml)) n))
+                                  (illsize (rest iml) n)
+                                  (first iml)
+                                  )]
                           ))
 
 (check-expect (illsize iml1 20) #f) 
 (check-expect (illsize iml2 20) #f) 
 (check-expect (illsize iml3 20) (rectangle 20 30 "solid" "red")) 
 
+; nenumlist is one of
+;  (cons number '())
+;  (cons number nenumlist)
+(define nenl1 (cons -2 '()))
+(define nenl2 (cons 2 (cons 3 '())))
+(define nenl3 (cons 3 (cons 2 (cons 4 (cons 1 '())))))
+(define nenl4 (cons 3 (cons 2 (cons 1 (cons 0 '())))))
+
+; nenumlist -> boolean
+;  judge whether the nenumlist is descending order 
+(define (sorted>? nenl) (cond 
+                          [(empty? (rest nenl)) #t]
+                          [else (if (sorted>? (rest nenl)) 
+                                    (> (first nenl) (first (rest nenl))) #f)]
+                          ))
+
+(check-expect (sorted>? nenl1) #t)
+(check-expect (sorted>? nenl2) #f)
+(check-expect (sorted>? nenl3) #f)
+(check-expect (sorted>? nenl4) #t)
+
+; a N is one of
+; 0
+; (add1 N)
+(define a (add1 (add1 (add1 0))))
+(define b (add1 (add1 0)))
+(define c 0)
+
+; N string -> list
+;  get a N's string list
+(define (replist n str) (cond
+                          [(= n 0) '()]
+                          [else (cons str (replist (- n 1) str))]
+                          ))
+
+(check-expect (replist a "wtt") (cons "wtt" (cons "wtt" (cons "wtt" '()))))
+(check-expect (replist b "cll") (cons "cll" (cons "cll" '())))
+(check-expect (replist c "ss") '())
+
 
 
 (test)
+
+
+
 
 
 
