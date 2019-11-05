@@ -178,25 +178,54 @@
 ; N string -> list
 ;  get a N's string list
 (define (replist n str) (cond
-                          [(= n 0) '()]
-                          [else (cons str (replist (- n 1) str))]
+                          [(zero? n) '()]
+                          [(positive? n) (cons str (replist (sub1 n) str))]
                           ))
 
 (check-expect (replist a "wtt") (cons "wtt" (cons "wtt" (cons "wtt" '()))))
 (check-expect (replist b "cll") (cons "cll" (cons "cll" '())))
 (check-expect (replist c "ss") '())
 
+; N -> number
+;  calculate the sum of N and 3
+(define (addpi n) (cond
+                    [(zero? n) 3]
+                    [(positive? n) (add1 (addpi (sub1 n)))]
+                    ))
+(check-expect (addpi 5) 8)
+(check-expect (addpi 3) 6)
+
+; N number -> number
+;  adds N with any number x
+(define (addpi2 n x) (cond
+                    [(zero? n) x]
+                    [(positive? n) (add1 (addpi2 (sub1 n) x))]
+                    ))
+(check-expect (addpi2 5 2) 7)
+(check-expect (addpi2 3 4) 7)
+
+; N number -> number
+;  multiply N with any number x
+(define (multi n x) (cond
+                      [(zero? n) 0]
+                      [(= n 1) x]
+                      [(positive? n) (+ x (multi (sub1 n) x))]
+                      ))
+(check-expect (multi 3 5) 15)
+(check-expect (multi 2 6) 12)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 (test)
-
-
-
-
-
-
-
-
-
-
-
