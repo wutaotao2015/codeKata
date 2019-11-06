@@ -66,7 +66,7 @@
 ;  if all numlist elements are positive, then calculate the sum, otherwise raise error
 (define (checked-sum nl) (cond 
                            [(empty? nl) 0]
-                           [(if (> (first nl) 0) (+ (first nl) (checked-sum (rest  nl))) 
+                           [else (if (> (first nl) 0) (+ (first nl) (checked-sum (rest  nl))) 
                               (error "nums are not all positive"))]
                            ))
 
@@ -214,17 +214,80 @@
 (check-expect (multi 3 5) 15)
 (check-expect (multi 2 6) 12)
 
+; N image -> list
+;  copies of image in a column
+(define (listImg n image) (cond
+                        [(zero? n) '()]
+                        [(positive? n) (cons image (listImg (sub1 n) image))]
+                        ))
+
+(define RECW 10)
+(define rec (rectangle RECW RECW "outline" "black"))
+(check-expect (listImg 3 rec) (cons rec (cons rec (cons rec '()))))
+(check-expect (listImg 0 rec) '())
+
+; list->image
+;  get above image from non-empty list
+(define (abvimg imglist) (cond
+                            [(empty? (rest imglist)) (first imglist)]
+                            [else (above (first imglist) (abvimg (rest imglist)))]
+                            )) 
+
+(check-expect (abvimg (cons rec (cons rec (cons rec '())))) (above rec rec rec))
+(check-expect (abvimg (cons rec '())) rec)
+
+; number image->image
+;  render list of image to image
+(define (col n image) (cond
+                        [(empty? (listImg n image)) bg]
+                        [(cons? (listImg n image)) 
+                           (place-image (abvimg (listImg n image)) 
+                                        (/ RECW 2) (/ (image-height (abvimg (listImg n image))) 2) bg)]
+                        ))
+
+(define bg (empty-scene 100 100))
+(check-expect (col 0 rec) bg)
+(check-expect (col 3 rec) (place-image (above rec rec rec) (/ RECW 2) 
+                                        (/ (image-height (abvimg (listImg 3 rec))) 2)bg))
 
 
+; list->image
+;  get beside image from non-empty list
+(define (besimg imglist) (cond
+                            [(empty? (rest imglist)) (first imglist)]
+                            [else (beside (first imglist) (besimg (rest imglist)))]
+                            )) 
 
+(check-expect (besimg (cons rec (cons rec (cons rec '())))) (beside rec rec rec))
+(check-expect (besimg (cons rec '())) rec)
 
+; number image->image
+;  render list of image to image
+(define (row n image) (cond
+                        [(empty? (listImg n image)) bg]
+                        [(cons? (listImg n image)) 
+                           (place-image (besimg (listImg n image)) 
+                                        (/ (image-width (besimg (listImg n image))) 2)
+                                        (/ RECW 2) bg)]
+                        ))
 
+(check-expect (row 0 rec) bg)
+(check-expect (row 3 rec) (place-image (beside rec rec rec) 
+                            (/ (image-width (besimg (listImg 3 rec))) 2) (/ RECW 2) bg))
 
+; number number -> image 
+;  get a empty-scene rowNumNum width and colNum width
+(define (gridbg rowNumNum colNum) (empty-scene (* RECW rowNumNum) (* RECW colNum)))
 
-
-
-
-
+; number number-> image
+;  draw a rectangle with rowNum width and colNum height, filled with RECW x RECW squares, lay on
+;  the same size of empty-scene
+;(define (grid rowNum colNum) (cond 
+;                         [(or (zero? rowNum) (zero? colNum)) (gridbg rowNum colNum)]
+;                         [(= rowNum 1) (row colNum rec)]
+;                         [else (above (row colNum rec) (grid (sub1 rowNum) colNum))]
+;                         ))
+;
 
 
 
