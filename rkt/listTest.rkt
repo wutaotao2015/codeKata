@@ -1,4 +1,7 @@
 #lang racket
+(define MAX-BYTES (* 100 1024 1024))
+(custodian-limit-memory (current-custodian) MAX-BYTES)
+
 (require test-engine/racket-tests)
 (require 2htdp/image)
 
@@ -264,31 +267,70 @@
 ; number image->image
 ;  render list of image to image
 (define (row n image) (cond
-                        [(empty? (listImg n image)) bg]
+                        [(empty? (listImg n image)) (gridEmpScene 1 0)]
                         [(cons? (listImg n image)) 
                            (place-image (besimg (listImg n image)) 
                                         (/ (image-width (besimg (listImg n image))) 2)
-                                        (/ RECW 2) bg)]
+                                        (/ RECW 2) (gridEmpScene 1 n))]
                         ))
 
-(check-expect (row 0 rec) bg)
+(check-expect (row 0 rec) (gridEmpScene 1 0))
 (check-expect (row 3 rec) (place-image (beside rec rec rec) 
-                            (/ (image-width (besimg (listImg 3 rec))) 2) (/ RECW 2) bg))
+                            (/ (image-width (besimg (listImg 3 rec))) 2) (/ RECW 2) 
+                            (gridEmpScene 1 3)))
 
 ; number number -> image 
 ;  get a empty-scene rowNumNum width and colNum width
-(define (gridbg rowNumNum colNum) (empty-scene (* RECW rowNumNum) (* RECW colNum)))
+(define (gridEmpScene rowNum colNum) (empty-scene (* RECW colNum) (* RECW rowNum)))
 
 ; number number-> image
 ;  draw a rectangle with rowNum width and colNum height, filled with RECW x RECW squares, lay on
 ;  the same size of empty-scene
-;(define (grid rowNum colNum) (cond 
-;                         [(or (zero? rowNum) (zero? colNum)) (gridbg rowNum colNum)]
-;                         [(= rowNum 1) (row colNum rec)]
-;                         [else (above (row colNum rec) (grid (sub1 rowNum) colNum))]
-;                         ))
-;
+;  draw columns one by one, using beside
+;  rownNum > 0 and colNum > 0
+(define (gridimg rowNum colNum) (cond 
+                         [(= colNum 1) (abvimg (listImg rowNum rec))]
+                         [else (beside (gridimg rowNum (sub1 colNum)) (abvimg (listImg rowNum rec)))]
+                         ))
 
+(check-expect (gridimg 2 3) (beside (abvimg (listImg 2 rec)) (abvimg (listImg 2 rec)) (abvimg (listImg 2 rec))))
+
+; number number-> image
+; place the gridimg to the empty scene  
+(define (grid rowNum colNum) (cond 
+                         [(or (zero? rowNum) (zero? colNum)) (gridEmpScene rowNum colNum)]
+                         [else (place-image 
+                                    (gridimg rowNum colNum)
+                                        (/ (image-width (gridimg rowNum colNum)) 2)
+                                        (/ (image-height (gridimg rowNum colNum)) 2)
+                                        (gridEmpScene rowNum colNum))]
+                         ))
+
+(check-expect (grid 3 4) (place-image 
+                                    (gridimg 3 4)
+                                        (/ (image-width (gridimg 3 4)) 2)
+                                        (/ (image-height (gridimg 3 4)) 2)
+                                        (gridEmpScene 3 4)))
+
+(define-struct posn [x y])
+(define DOT (circle 3 "solid" "red"))
+(define dots (cons (make-posn 20 30) (cons (make-posn 30 40) (cons (make-posn 40 70) '()))))
+(define GRIDBG (grid 10 10))
+; posnlist image -> image
+;  render posnlist(dots) with red dots in the gridbg
+(define (add-dots dots gridbg) (cond
+                                 [(empty? dots) gridbg]
+                                 [else (place-image DOT (posn-x (first dots))
+                                                        (posn-y (first dots))
+                                                        (add-dots (rest dots) gridbg)
+                                                        )]
+                                 ))
+
+(check-expect (add-dots dots GRIDBG) 
+              (place-image DOT 20 30 
+                           (place-image DOT 30 40
+                                        (place-image DOT 40 70 GRIDBG)
+                                        )))
 
 
 (test)
