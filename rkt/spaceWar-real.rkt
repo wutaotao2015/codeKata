@@ -6,12 +6,11 @@
 (require 2htdp/universe)
 (require 2htdp/batch-io)
 
-(define BGW 400)
+(define BGW 1000)
 (define BGH 400)
 (define BG (empty-scene BGW BGH))
 (define UFOV 0.6)
 (define UFOH 10)
-(define UFODX 0.3)
 (define UFOW 40)
 (define UFO (overlay/align "middle" "bottom"
                            (ellipse UFOW UFOH "solid" "blue")
@@ -23,13 +22,14 @@
 ;(define OM (place-image UFO (/ BGW 2) 0 (place-image TANK (/ TW 2) (- BGH (/ TH 2)) BG)))
 
 (define MIS (triangle TH "solid" "red"))
+(define MAXMIS 3)
 ;(define OM2 (place-image MIS 20 30 OM))
 
 ; ufo is a posn
 ;   (make-posn number number)
 ;  it is the location of ufo
 
-(define ufo1 (make-posn 0 0))
+(define ufo1 (make-posn 0 (+ (/ UFOH 2) 10)))
 (define ufo2 (make-posn (/ BGW 2) (- BGH (/ UFOH 2))))
 (define ufo3 (make-posn (/ BGW 2) (/ BGH 2)))
 
@@ -178,23 +178,23 @@
 (define (gameOver ws)
   (cond
     [(empty? (sgt-mis ws)) (cond
-                             [(>=  (posn-y (sgt-ufo ws)) (- BGH (/ UFOH 2))) #t]
+                             [(>=  (posn-x (sgt-ufo ws)) BGW) #t]
                              [else #f]
                              )]
     [else (cond
-            [(>=  (posn-y (sgt-ufo ws)) (- BGH (/ UFOH 2))) #t]
+            [(>=  (posn-x (sgt-ufo ws)) BGW) #t]
             [(clsList? (sgt-mis ws) (sgt-ufo ws)) #t]
-            [(allps? (sgt-mis ws) (sgt-ufo ws)) #t]
+            [(and (= (misnum (sgt-mis ws)) MAXMIS) (allps? (sgt-mis ws) (sgt-ufo ws))) #t]
             [else #f]
             )]
     ))
 (check-expect (gameOver sgt1) #f)
 (check-expect (gameOver sgt3) #f)
-(check-expect (gameOver sgt2) #t)
+(check-expect (gameOver sgt2) #f)
 (check-expect (gameOver sgt4) #t)
 (check-expect (gameOver sgt5) #f)
 (check-expect (gameOver sgt6) #t)
-(check-expect (gameOver sgt7) #t)
+(check-expect (gameOver sgt7) #f)
 
 ; ws -> image
 ;  render ws to image at last
@@ -205,14 +205,14 @@
       (cond
         [(clsList? (sgt-mis ws) (sgt-ufo ws))
          (text "Congratulations!\nUFO got hit!" 30 "red")]
-        [(allps? (sgt-mis ws) (sgt-ufo ws))
-         (text "You just missed it!" 30 "red")]
+        [(and (= (misnum (sgt-mis ws)) MAXMIS) (allps? (sgt-mis ws) (sgt-ufo ws)))
+         (text "All the missiles have missed!" 30 "red")]
         [else (text "Game Over!" 30 "red")])
       ])
   )
 ; posn -> posn
 ;  each missile next tick position
-(define (next-mis mp) (make-posn (posn-x mp) (- (posn-y mp) (* 2 UFOV))))
+(define (next-mis mp) (make-posn (posn-x mp) (- (posn-y mp) (* 3 UFOV))))
 
 ;  list -> list
 ;  each missile in the list move one tick's distance
@@ -230,28 +230,40 @@
 ;   UFO is vertical down and delta move at horizontal level
 ;   MIS is vertical up(2x speed of UFO) and not changed in horizontal level
 ;   TANK is moving accoring to its v
-(define (move ws) (make-sgt (make-posn (+ UFODX (posn-x (sgt-ufo ws)))
-                                       (+ UFOV (posn-y (sgt-ufo ws)))) 
+(define (move ws) (make-sgt (make-posn (+ UFOV (posn-x (sgt-ufo ws)))
+                                       (posn-y (sgt-ufo ws))) 
                             (make-tank (+ (tank-v (sgt-tank ws)) (tank-x (sgt-tank ws)))
                                        (tank-v (sgt-tank ws))) 
                             (mismove (sgt-mis ws))))
 
-(check-expect (move sgt1) (make-sgt (make-posn (+ UFODX (posn-x (sgt-ufo sgt1)))
-                                               (+ UFOV (posn-y (sgt-ufo sgt1)))
+(check-expect (move sgt1) (make-sgt (make-posn (+ UFOV (posn-x (sgt-ufo sgt1)))
+                                               (posn-y (sgt-ufo sgt1)) 
                                                ) 
                                     (make-tank (+ (tank-v (sgt-tank sgt1)) (tank-x (sgt-tank sgt1)))
                                                (tank-v (sgt-tank sgt1)))
                                     (mismove (sgt-mis sgt1))))
-(check-expect (move sgt3) (make-sgt (make-posn (+ UFODX (posn-x (sgt-ufo sgt3)))
-                                               (+ UFOV (posn-y (sgt-ufo sgt3)))
+(check-expect (move sgt3) (make-sgt (make-posn (+ UFOV (posn-x (sgt-ufo sgt3)))
+                                               (posn-y (sgt-ufo sgt3)) 
                                                ) 
                                     (make-tank (+ (tank-v (sgt-tank sgt3)) (tank-x (sgt-tank sgt3)))
                                                (tank-v (sgt-tank sgt3)))
                                     (mismove (sgt-mis sgt3))))
 
+; list -> number
+;   calculate the numbers of missiles in the list
+(define (misnum mis) (cond
+                       [(empty? mis) 0]
+                       [(cons? mis) (add1 (misnum (rest mis)))]
+                       ))
+
+(check-expect (misnum mis4) 0)
+(check-expect (misnum mis5) 3)
+(check-expect (misnum mis6) 2)
+
 ; ws -> ws
 ;  key event handler, left and right key turn the tank left and right
 ;  space key launch the mis if it has not bee launched yet
+; it can only fire at most MAXMIS missiles, and only one missile can be in the pane
 (define (kh ws key) (cond
                       [(or (and (string=? key "left") (> (tank-v (sgt-tank ws)) 0))
                            (and (string=? key "right") (< (tank-v (sgt-tank ws)) 0)))
@@ -259,10 +271,13 @@
                                  (make-tank (tank-x (sgt-tank ws))
                                             (- 0 (tank-v (sgt-tank ws)))) 
                                  (sgt-mis ws))]
-                      [(string=? key " ") (make-sgt (sgt-ufo ws)
-                                                    (sgt-tank ws)
-                                                    (cons (make-posn (tank-x (sgt-tank ws)) TANKY) 
-                                                          (sgt-mis ws)))]
+                      [(and (string=? key " ") 
+                            (< (misnum (sgt-mis ws)) MAXMIS)
+                            (if (empty? (sgt-mis ws)) #t (< (posn-y (first (sgt-mis ws))) 0))
+                            ) (make-sgt (sgt-ufo ws)
+                            (sgt-tank ws)
+                            (cons (make-posn (tank-x (sgt-tank ws)) TANKY) 
+                                  (sgt-mis ws)))]
                       [else ws]))
 
 (check-expect (kh sgt3 "left") (make-sgt (sgt-ufo sgt3)

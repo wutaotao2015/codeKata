@@ -1,7 +1,4 @@
-#lang racket
-
-(define MAX-BYTES (* 100 1024 1024))
-(custodian-limit-memory (current-custodian) MAX-BYTES)
+#lang htdp/bsl
 
 (require test-engine/racket-tests)
 (require 2htdp/image)
