@@ -73,6 +73,7 @@
 (define sgt4 (make-sgt ufo3 tank2 mis3))
 (define sgt5 (make-sgt ufo1 tank1 mis5))
 (define sgt6 (make-sgt ufo3 tank2 mis5))
+(define sgt7 (make-sgt ufo3 tank2 mis6))
 
 ; a ws is a sgt, mis is a list of positions
 ;  it is the complete sgt of the world program
@@ -167,7 +168,7 @@
                            [(cons? mis) (cond
                                           [(empty? (rest mis)) (pass? (first mis) ufo)]
                                           [else (and (pass? (first mis) ufo) 
-                                                  (allps? (rest mis) ufo))]
+                                                     (allps? (rest mis) ufo))]
                                           )]
                            ))
 
@@ -179,46 +180,63 @@
 ;  stop when the ufo lands 
 ; or any missile hit the ufo(distance is less than UFOW/2)
 ; or all missiles has passed ufo
-;(define (gameOver ws)
-;  (cond
-;    [(empty? (sgt-mis ws)) (cond
-;                             [(>=  (posn-y (sgt-ufo ws)) (- BGH (/ UFOH 2))) #t]
-;                             [else #f]
-;                             )]
-;    [else (cond
-;            [(>=  (posn-y (sgt-ufo ws)) (- BGH (/ UFOH 2))) #t]
-;            [(<=  (dis (sgt-ufo ws) (sgt-mis ws)) (/ UFOW 2)) #t]
-;            [(< (posn-y (sgt-mis ws)) (posn-y (sgt-ufo ws))) #t]
-;            [else #f]
-;            )]
-;    ))
-;(check-expect (gameOver sgt1) #f)
-;(check-expect (gameOver sgt3) #f)
-;(check-expect (gameOver sgt2) #t)
-;(check-expect (gameOver sgt4) #t)
+(define (gameOver ws)
+  (cond
+    [(empty? (sgt-mis ws)) (cond
+                             [(>=  (posn-y (sgt-ufo ws)) (- BGH (/ UFOH 2))) #t]
+                             [else #f]
+                             )]
+    [else (cond
+            [(>=  (posn-y (sgt-ufo ws)) (- BGH (/ UFOH 2))) #t]
+            [(clsList? (sgt-mis ws) (sgt-ufo ws)) #t]
+            [(allps? (sgt-mis ws) (sgt-ufo ws)) #t]
+            [else #f]
+            )]
+    ))
+(check-expect (gameOver sgt1) #f)
+(check-expect (gameOver sgt3) #f)
+(check-expect (gameOver sgt2) #t)
+(check-expect (gameOver sgt4) #t)
+(check-expect (gameOver sgt5) #f)
+(check-expect (gameOver sgt6) #t)
+(check-expect (gameOver sgt7) #t)
 
-;; ws -> image
-;;  render ws to image at last
-;(define (final ws)
-;  (cond
-;    [(false? (sgt-mis ws)) (text "Game Over!" 30 "red")]
-;    [else
-;      (cond
-;        [(<=  (dis (sgt-ufo ws) (sgt-mis ws)) (/ UFOW 2))
-;         (text "Congratulations!\nUFO got hit!" 30 "red")]
-;        [(< (posn-y (sgt-mis ws)) (posn-y (sgt-ufo ws)))
-;         (text "You just missed it!" 30 "red")]
-;        [else (text "Game Over!" 30 "red")])
-;      ])
-;  )
-;
-;; ws -> ws
-;;  on-tick handler
-;;   UFO is vertical down and delta move at horizontal level
-;;   MIS is vertical up(2x speed of UFO) and not changed in horizontal level
-;;   TANK is moving accoring to its v
+; ws -> image
+;  render ws to image at last
+(define (final ws)
+  (cond
+    [(empty? (sgt-mis ws)) (text "Game Over!" 30 "red")]
+    [else
+      (cond
+        [(cls? (sgt-ufo ws) (sgt-mis ws))
+         (text "Congratulations!\nUFO got hit!" 30 "red")]
+        [(allps? (sgt-mis ws) (sgt-ufo ws))
+         (text "You just missed it!" 30 "red")]
+        [else (text "Game Over!" 30 "red")])
+      ])
+  )
+; posn -> posn
+;  each missile next tick position
+(define (next-mis mp) (make-posn (posn-x mp) (- (posn-y mp) (* 2 UFOV))))
+
+;  list -> list
+;  each missile in the list move one tick's distance
+(define (mismove mis) (cond
+                        [(empty? mis) mis]
+                        [(cons? mis) (cons (next-mis (first mis))
+                                          (mismove (rest mis)))]))
+
+(check-expect (mismove '()) '())
+(check-expect (mismove mis5) (cons (next-mis MPS1) (cons (next-mis MPS2) (cons (next-mis MPS3) '()))))
+(check-expect (mismove mis6) (cons (next-mis MPS4) (cons (next-mis MPS5) '())))
+
+; ws -> ws
+;  on-tick handler
+;   UFO is vertical down and delta move at horizontal level
+;   MIS is vertical up(2x speed of UFO) and not changed in horizontal level
+;   TANK is moving accoring to its v
 ;(define (move ws) (cond
-;                    [(false? (sgt-mis ws)) (make-sgt (make-posn (+ UFODX (posn-x (sgt-ufo ws)))
+;                    [(empty? (sgt-mis ws)) (make-sgt (make-posn (+ UFODX (posn-x (sgt-ufo ws)))
 ;                                                                (+ UFOV (posn-y (sgt-ufo ws)))
 ;                                                                ) 
 ;                                                     (make-tank (+ (tank-v (sgt-tank ws)) (tank-x (sgt-tank ws)))
@@ -245,7 +263,7 @@
 ;                                    (make-posn  (posn-x (sgt-mis sgt3))
 ;                                                (-  (posn-y (sgt-mis sgt3)) (* 2 UFOV))) 
 ;                                    ))
-;
+
 ;; ws -> ws
 ;;  key event handler, left and right key turn the tank left and right
 ;;  space key launch the mis if it has not bee launched yet
