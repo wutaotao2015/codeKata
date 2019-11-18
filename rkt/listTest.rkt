@@ -332,5 +332,20 @@
                                         (place-image DOT 40 70 GRIDBG)
                                         )))
 
+; string list -> number
+; determine how oftrn n appears in list 
+(define (count str list) (cond 
+                           [(empty? list) 0]
+                           [(cons? list) (if (string=? str (first list)) 
+                                           (add1 (count str (rest list)))
+                                           (count str (rest list)))]
+                           ))
+
+(check-expect (count "wtt" (cons "sl" (cons "wtt" (cons "wtt" '())))) 2)
+(check-expect (count "wtt" (cons "sl" (cons "wtt" (cons "t" '())))) 1)
+(check-expect (count "wtt" '()) 0)
+
+
+
 
 (test)
