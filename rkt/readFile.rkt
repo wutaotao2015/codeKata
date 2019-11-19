@@ -138,6 +138,59 @@
 (check-expect (line-onestr line2) 0)
 (check-expect (line-onestr line3) 13)
 
+; a Row is one of
+; '()
+; (cons number Row)
+
+; a Matrix is one of
+; '()
+; (cons Row Matrix)
+(define row1 (list 11 12))
+(define row2 (list 21 22))
+(define matrix1 (list row1 row2))
+
+; matrix -> matrix
+;  transpose a matrix by its diagonal
+(define (trans lls) (cond
+                      [(empty? (first lls)) '()]
+                      [else (cons (first* lls) (trans (rest* lls)))]
+                      ))
+(check-expect (trans matrix1) (list (list 11 21) (list 12 22)))
+
+; matrix -> row
+;  return the first column of the matrix
+(define (first* mat) (cond
+                       [(empty? mat) '()]
+                       [else (cons (first (first mat)) (first* (rest mat)))]
+                       ))
+(check-expect (first* matrix1) (list 11 21))
+
+; matrix -> matrix
+;  return the left matrix after removing the first column
+(define (rest* mat) (cond
+                      [(empty? mat) '()]
+                      [else (cons (rest (first mat)) (rest* (rest mat)))]
+                      ))
+(check-expect (rest* matrix1) (list (list 12) (list 22)))
+
+; list -> list
+;  reverse a list
+(define (rev list) (cond 
+                     [(empty? list) '()]
+                     [else (add-end (rev (rest list)) (first list))]
+                     ))
+; list -> list
+;  add a element at the end of list
+(define (add-end l e) (cond
+                        [(empty? l) (cons e '())]
+                        [else (cons (first l) (add-end (rest l) e))]
+                        ))
+(check-expect (add-end (list 2 3) 5) (list 2 3 5))
+(check-expect (add-end (list 3 5) 7) (list 3 5 7))
+
+(check-expect (rev (list 2 4 5)) (list 5 4 2))
+(check-expect (rev (list 2 4 7 5)) (list 5 7 4 2))
+
 
 
 
