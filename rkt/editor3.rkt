@@ -126,13 +126,17 @@
 (check-expect (edit e3 "end") (editor-from-str "hello" ""))
 (check-expect (edit e4 "end") (editor-from-str "hello" ""))
 
+; list -> image
+;  render an editor'pre/post list to a text image 
+(define (editor-text list) (text (implode list) FS "black"))
+
 ; editor -> image
 ; render an editor to an image
 (define (show ed) 
   (overlay/align "left" "center"
-                 (beside (text (implode (reverse (editor-pre ed))) FS "black")
+                 (beside (editor-text (reverse (editor-pre ed))) 
                          CURSOR
-                         (text (implode (editor-post ed)) FS "black")) BG))
+                         (editor-text (editor-post ed))) BG))
 
 (check-expect (show ed1) 
               (overlay/align "left" "center"
@@ -151,11 +155,13 @@
 ; run the editor
 (define (run pre)
   (big-bang (editor-from-str pre "")
-           [to-draw show] 
-           [on-key edit]))
+            [to-draw show] 
+            [on-key edit]))
 
-(run "begin")
-
+;(run "begin")
+(check-expect (cons (cons 1 (cons 2 '())) (cons (cons 2 '()) '())) 
+              (list (list 1 2) (list 2)))
+(check-expect (cons (cons 2 '()) '()) (list (list 2)))
 
 ; this need to put at last line to ensure testing all test cases
 (test)
