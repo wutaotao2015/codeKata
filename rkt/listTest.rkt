@@ -345,6 +345,28 @@
 (check-expect (count "wtt" (cons "sl" (cons "wtt" (cons "t" '())))) 1)
 (check-expect (count "wtt" '()) 0)
 
+; list -> list
+;  sort number list ascendingly
+(define (sort>  ls) (cond
+                      [(empty? (rest ls)) ls]
+                      [else (insert (first ls) (sort> (rest ls)))]
+                      ))
+
+; number list -> list
+;  insert a number to a list ascendingly
+(define (insert num ls) (cond
+                          [(empty? ls) (list num)]
+                          [else (if (<= num (first ls)) (cons num ls) 
+                                  (cons (first ls) (insert num (rest ls))))]
+                          ))
+
+(check-expect (insert 3 (list 1 2 4)) (list 1 2 3 4))
+(check-expect (insert 2 (list 1)) (list 1 2))
+(check-expect (insert 2 '()) (list 2))
+
+(check-expect (sort> (list 4 1 3)) (list 1 3 4))
+(check-expect (sort> (list 9 4 3 2 7)) (list 2 3 4 7 9))
+(check-expect (sort> (list 4)) (list 4))
 
 
 
