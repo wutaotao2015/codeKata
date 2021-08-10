@@ -1,0 +1,4 @@
+name, age, salary
+wtt, 33, 10000
+cll, 22, 6666
+wsl, 28, 8800
