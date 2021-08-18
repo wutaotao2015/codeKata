@@ -1,0 +1,6 @@
+Builder bookList({"title":"listTitle"}, 
+  book("first book"),
+  book({"price":"100"}, "second book"), 
+  book({"name": "thirdBook","author": "wtt"}, 
+        chapters("7 chapters"))
+)

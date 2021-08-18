@@ -3,7 +3,7 @@ wtt := Object clone
 wtt talk := method(
   "are you online? cll" println
   yield
-  "have you off duty today" println
+  "have you been off duty today" println
   yield
 )
 
