@@ -2,7 +2,22 @@
   <head><title>test</title></head>
   <body>
     <script>
-        console.log("hello")
+      f = function() {
+        var count = 0
+        return function(){
+          return ++count
+        }
+      }
+      c = f()
+      console.log(c())
+      console.log(c())
+      console.log(c())
+
+      s = function(a,b) {
+        newA = Array.prototype.slice.apply(arguments)
+      }
+      s("wtt", "cll")
+
     </script>
   </body>
 </html>
