@@ -12,7 +12,9 @@ min(Min, A, B) :- A = B, Min is A.
 min(Min, A, B) :- A > B, Min is B.
 
 minList(M, [A]) :- minList(A, [A]).
+
 % need to use tail recursion optimization here
-% minList(M, [Head|Tail]) :- minList(Tmp, Tail), min(M, Tmp, Head).
-% minList(M, [Head|Tail]) :- M < Head, minList(M, Tail).
+minList(M, [Head|Tail]) :- 
+Tmp is min(M, Head),
+minList(Tmp, Tail).
 
